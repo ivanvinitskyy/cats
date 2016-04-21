@@ -1,5 +1,13 @@
 #!/usr/bin/python
 
+#################################################################################################
+# Assumption: attempt to move within isolated station is counted as a move                      #
+# No emphasis on speed of execution, instead I focused on readability of code.                  #
+# For this reason some things were made into an object, when they didn't strictly need to be.   #
+# This also helped with statistics gathering and generation                                     #
+#################################################################################################
+
+
 import sys
 import argparse
 import json
@@ -235,7 +243,7 @@ class TFL(object):
               self.stations[int(station[1])] = Station(int(station[1]))
               self.stations[int(station[1])].addConnection(int(station[0]))
         except ValueError:
-          print "Failed to parse desig file JSON"
+          print "Failed to parse design file JSON"
           exit(1)
     except (OSError, IOError):
       print "Failed to read TFL design file"
@@ -338,9 +346,9 @@ def main():
   maxConcurrentTraffic = network.getMaxConcurrentTrafficStation()
   maxTraffic = network.getMaxTrafficStation()
   allMatches = network.getAllTimeMatches()
-  for match in allMatches: 
-    if(not cats[match].isReunited()): 
-      closeCalls.add(match) 
+  for match in allMatches:
+    if(not cats[match].isReunited()):
+      closeCalls.add(match)
 
   print "Total number of cats: %i" % (args.cats)
   print "Number of cats found: %i" % (happyCats)
