@@ -236,8 +236,10 @@ class TFL(object):
               self.stations[int(station[1])].addConnection(int(station[0]))
         except ValueError:
           print "Failed to Parse JSON"
+          exit(1)
     except (OSError, IOError):
       print "Failed to read TFL design file"
+      exit(1)
     with open(names) as json_names:
       json_nn = json.load(json_names)
       for station in json_nn: #Give names to all stations that are present in json file.
@@ -264,19 +266,34 @@ def seed(n, stations):
     owners[i] = Owner(i)
     owners[i].setLocation(stations.keys()[locations[1]])
 
-def main():
+def tryMoveCats():
+  for key, cat in cats.iteritems():
+    if(not cat.isReunited()):
+      catPositions = cat.move(network.getAllStations()[cat.getLocation()].getConnections())  # Move and get current, previous locations
+      network.getAllStations()[catPositions[0]].catDeparted(cat.getTag())  # Update station records
+      network.getAllStations()[catPositions[1]].catArrived(cat.getTag())   # Update station records
+
+def tryMoveOwners():
+  for key, owner in owners.iteritems():
+    if(not owner.isReunited()):
+      ownerPositions = owner.move(network.getAllStations()[owner.getLocation()].getConnections()) # Move and get current, previous locations
+      network.getAllStations()[ownerPositions[0]].ownerDeparted(owner.getCatTag()) # Update station records
+      network.getAllStations()[ownerPositions[1]].ownerArrived(owner.getCatTag())  # Update station records
+
+def runParser():
   parser = argparse.ArgumentParser()
   parser.add_argument('cats', type=int, help='Number of cats and owners')
   parser.add_argument("--debug", action="store_true", help="DEBUG Verbosity")
   parser.add_argument("--max-moves", type=int, help="Search limit", default=10000)
-  args = parser.parse_args()
+  return parser.parse_args()
 
+def main():
+  args = runParser()
   if(int(args.cats)<1):
     print "You need some lost cats to run this program"
-    exit(2)
+    exit(1)
 
   global debug, cats, owners, network
-
   cats = OrderedDict()
   owners = OrderedDict()
   network = TFL()
@@ -328,18 +345,5 @@ def main():
   print "Busiest station by concurrent visitors: %s with %i concurrent visitors" % (maxConcurrentTraffic[0], maxConcurrentTraffic[1])
   print "Close calls (pairs that were at same station but at wrong times and eventually never met): %s" % (", ".join(str(s) for s in closeCalls))
 
-def tryMoveCats():
-  for key, cat in cats.iteritems():
-    if(not cat.isReunited()):
-      catPositions = cat.move(network.getAllStations()[cat.getLocation()].getConnections())  # Move and get current, previous locations
-      network.getAllStations()[catPositions[0]].catDeparted(cat.getTag())  # Update station records
-      network.getAllStations()[catPositions[1]].catArrived(cat.getTag())   # Update station records
-
-def tryMoveOwners():
-  for key, owner in owners.iteritems():
-    if(not owner.isReunited()):
-      ownerPositions = owner.move(network.getAllStations()[owner.getLocation()].getConnections()) # Move and get current, previous locations
-      network.getAllStations()[ownerPositions[0]].ownerDeparted(owner.getCatTag()) # Update station records
-      network.getAllStations()[ownerPositions[1]].ownerArrived(owner.getCatTag())  # Update station records
 
 if __name__ == "__main__": main()
