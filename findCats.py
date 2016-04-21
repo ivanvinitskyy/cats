@@ -235,15 +235,23 @@ class TFL(object):
               self.stations[int(station[1])] = Station(int(station[1]))
               self.stations[int(station[1])].addConnection(int(station[0]))
         except ValueError:
-          print "Failed to Parse JSON"
+          print "Failed to parse desig file JSON"
           exit(1)
     except (OSError, IOError):
       print "Failed to read TFL design file"
       exit(1)
-    with open(names) as json_names:
-      json_nn = json.load(json_names)
-      for station in json_nn: #Give names to all stations that are present in json file.
-        self.stations[int(station[0])].setName(station[1])
+    try:
+      with open(names) as json_names:
+        try:
+          json_nn = json.load(json_names)
+          for station in json_nn: #Give names to all stations that are present in json file.
+            self.stations[int(station[0])].setName(station[1])
+        except ValueError:
+          print "Failed to parse names file JSON"
+          exit(1)
+    except (OSError, IOError):
+      print "Failed to read station names file"
+      exit(1)
 
   def closeStation(self, closingStation):
     if(self.stations[closingStation].getState() == "open"):
