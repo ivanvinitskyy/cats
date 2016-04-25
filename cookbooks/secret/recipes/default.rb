@@ -1,3 +1,5 @@
+include_recipe 'php', 'apache2', 'apache2::mod_php5'
+
 web_app 'secret' do
   docroot node['docroot']
   server_name node['apache']['server_name']
