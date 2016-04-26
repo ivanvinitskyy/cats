@@ -8,3 +8,4 @@ version          '0.1'
 
 depends "apache2"
 depends "php"
+depends "sysctl"
