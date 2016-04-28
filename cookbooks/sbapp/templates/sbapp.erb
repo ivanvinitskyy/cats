@@ -1,0 +1,19 @@
+upstream appserver {
+      <% node['appservers'].each_with_index do |ip, index| %>
+      <%= "server #{ip}:8484;" %>
+      <% end %>
+    }
+
+server {
+  listen   <%= node['sbapp']['appport'] -%>;
+  server_name  <%= node['hostname'] %>;
+
+  access_log  <%= node['nginx']['log_dir'] %>/localhost.access.log;
+
+  location / {
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header Host $host;
+    proxy_pass http://appserver;
+  }
+}
